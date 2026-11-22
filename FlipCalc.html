@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FlipCalc</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#000;--card:#1c1c1e;--line:#2c2c2e;--tx:#fff;--mu:#8e8e93;--g:#4ade9b;--r:#ff6b86;--ac:#8b5cf6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);min-height:100vh;color:var(--tx);font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;max-width:520px;margin:auto;padding:14px 14px 40px}
+h1{font-size:40px;margin:0 0 6px;font-weight:800;letter-spacing:-1px;color:#fff;text-align:center}
+.hero{margin:10px 0 20px}.tag{color:var(--mu);font-size:17px;margin:0;text-align:center}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{text-align:left;background:#1f1f21;border:0;border-radius:22px;padding:18px 16px;color:var(--tx);min-height:124px;display:flex;flex-direction:column;gap:5px;cursor:pointer;font-family:inherit}
+.tile svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tile b{font-size:21px;font-weight:700;margin-top:8px}.tile span{color:var(--mu);font-size:15px;line-height:1.3}
+.xcard{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+.xhead{display:flex;justify-content:space-between;align-items:center}.xhead b{font-size:22px}
+.badge{background:#2b2150;color:#b79cff;border-radius:14px;padding:6px 12px;font-weight:600;font-size:14px}
+#bar{display:flex;align-items:center;gap:12px;margin:4px 0 12px}#bar button{background:#1f1f21;color:var(--tx);border:0;border-radius:12px;padding:9px 14px;font-size:15px}#ttl{font-size:22px}
+.item{border-top:1px solid var(--line);padding:12px 0}.item:first-child{border:0;padding-top:0}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.plan{background:#0f0f10;border:1px solid var(--line);border-radius:16px;padding:12px}.pr{font-size:26px;font-weight:800;margin:4px 0}
+button.lnk{border:0;font-family:inherit;cursor:pointer;width:100%}
+.lnk{display:inline-block;background:var(--ac);color:#fff;text-decoration:none;border-radius:10px;padding:9px 14px;font-size:14px;font-weight:600;margin-top:8px}
+.mk{width:38px;height:38px;border-radius:50%;background:#2b2150;color:#b79cff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-right:10px}
+.stt{font-size:12px;color:var(--mu);border:1px solid var(--line);border-radius:10px;padding:3px 8px}
+.pg{height:8px;border-radius:6px;background:#2c2c2e;overflow:hidden;margin:8px 0}.pg i{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#6d28d9)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
+.tabs button{flex:none;background:var(--card);color:var(--mu);border:1px solid var(--line);border-radius:20px;padding:9px 14px;font-size:14px}
+.tabs button.on{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border-color:#8b5cf6;font-weight:600;box-shadow:0 4px 16px rgba(139,92,246,.35)}
+.card{background:var(--card);border-radius:20px;padding:16px;margin-bottom:12px}
+#res,#cres{border-color:#5b3aa8;background:linear-gradient(160deg,#2a1559,#120a24);box-shadow:0 10px 34px rgba(124,58,237,.25)}
+.card h2{font-size:14px;color:var(--mu);font-weight:500;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;color:var(--mu)}
+input,select{width:100%;margin-top:4px;background:#0a0713;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:16px}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.full{grid-column:1/-1}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row:last-child{border:0}.row span:first-child{color:var(--mu)}
+.big{font-size:38px;font-weight:800;letter-spacing:-.5px;margin:2px 0 4px}
+.pos{color:var(--g)}.neg{color:var(--r)}
+.sub{font-size:13px;color:var(--mu);margin-bottom:8px}
+.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btns button{background:#2c2c2e;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{color:var(--mu);font-weight:500;text-align:right;padding:6px 0}td{text-align:right;padding:8px 0;border-top:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+.note{font-size:12px;color:var(--mu);line-height:1.4}
+summary{cursor:pointer;color:var(--mu);font-size:14px;margin-bottom:10px}
+#sw{margin-bottom:6px}
+.stat{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:8px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--g);display:inline-block}
+.dot.manual{background:var(--ac)}.dot.stale{background:#f5b946}.dot.error{background:var(--r)}
+.dot.updating{background:var(--ac);animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.dot.updating{animation:none}}
+.tg{position:relative;display:inline-block;width:46px;height:26px;margin-left:10px}
+.tg input{position:absolute;opacity:0;width:100%;height:100%;margin:0;z-index:1;cursor:pointer}
+.tg i{position:absolute;inset:0;background:#2a2043;border-radius:20px;transition:.2s}
+.tg i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.tg input:checked+i{background:var(--ac)}
+.tg input:checked+i::after{transform:translateX(20px)}
+.ctl{display:flex;align-items:center}
+.ctl button{background:transparent;color:var(--mu);border:1px solid var(--line);border-radius:8px;width:34px;height:30px;margin-left:6px}
+.ctl button:disabled{opacity:.3}
+textarea{width:100%;margin-top:4px;background:#0a0713;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:16px;font-family:inherit;resize:vertical}
+.cpb{background:#2c2c2e;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer}
+[hidden]{display:none!important}
+
+.cpm{margin-left:8px;padding:1px 6px;font-size:12px;line-height:1.4;vertical-align:middle;border-radius:8px}
+.big .cpm{font-size:14px}
+:root[data-theme=light]{--bg:#f2f2f7;--card:#fff;--line:#e2e2e8;--tx:#111114;--mu:#6b6b75;--g:#15a05a;--r:#e11d48;color-scheme:light}
+[data-theme=light] h1{color:#111114}
+[data-theme=light] .tile,[data-theme=light] #bar button{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+[data-theme=light] .tile svg{stroke:#111114}
+[data-theme=light] input,[data-theme=light] select,[data-theme=light] textarea,[data-theme=light] .plan{background:#f6f6fa!important;color:#111114}
+[data-theme=light] .btns button,[data-theme=light] .cpb,[data-theme=light] .ctl button{background:#ececf2;color:#111114;border-color:#d8d8e0}
+[data-theme=light] .badge,[data-theme=light] .mk{background:#ede9fe;color:#6d28d9}
+[data-theme=light] #res,[data-theme=light] #cres{background:linear-gradient(160deg,#ede9fe,#f7f5ff);border-color:#c4b5fd;box-shadow:0 8px 26px rgba(124,58,237,.12)}
+[data-theme=light] .tg i{background:#cfcfd8}[data-theme=light] .pg{background:#e2e2e8}
+[data-theme=light] .lnk,[data-theme=light] .tabs button.on{color:#fff}
+</style>
+</head>
+<body>
+<div id="home"><div class="hero"><h1>FlipCalc</h1><p class="tag">Умный финансовый помощник</p></div><div class="tiles" id="tiles"></div><div class="xcard" id="toolc" role="button" tabindex="0" style="cursor:pointer"><div class="xhead"><b>Инструменты</b></div><p class="tag" style="text-align:left;margin-top:12px">Сравнение площадок, партия товаров, график прибыли, экспорт в CSV</p></div><div class="btns"><button id="gset">Настройки разделов</button></div></div>
+<div id="bar" hidden><button id="back">‹ Назад</button><b id="ttl"></b></div>
+<div class="tabs" id="sw" hidden></div>
+<div id="calc">
+<div class="tabs" id="tabs"></div>
+
+<div class="card">
+<div class="grid">
+<label>Закупка<input id="buy" inputmode="decimal"></label>
+<label>Доп. расходы<input id="extra" inputmode="decimal"></label>
+<label data-m="m">Наценка, %<input id="markup" inputmode="decimal"></label>
+<label data-m="m">Наценка от<select id="mb"><option value="buy">Закупки</option><option value="cost">Закупки + расходов</option></select></label>
+<label data-m="p">Цена продажи<input id="price" inputmode="decimal"></label>
+<label data-m="t">Желаемая чистая прибыль<input id="target" inputmode="decimal"></label>
+</div>
+</div>
+
+<div class="card" id="res"></div>
+
+<div class="card">
+<h2>Профиль комиссий</h2>
+<div class="grid">
+<label class="full">Профиль<select id="sel"></select></label>
+<label class="full">Название<input id="name"></label>
+<label>Комиссия продажи, %<input id="fp" inputmode="decimal"></label>
+<label>Фикс. комиссия, ₽<input id="ff" inputmode="decimal"></label>
+<label>Комиссия вывода, %<input id="wp" inputmode="decimal"></label>
+<label>Мин. комиссия вывода, ₽<input id="wmin" inputmode="decimal"></label>
+<label>База комиссии вывода<select id="wb"><option value="after">Сумма после комиссии продажи</option><option value="gross">Цена продажи</option></select></label>
+<label>Налог, % от поступления<input id="tax" inputmode="decimal"></label>
+<label>Округление<select id="dec"><option value="2">До копеек</option><option value="0">До рубля</option></select></label>
+</div>
+<div class="btns" id="pre"></div>
+<div class="btns"><button id="bNew">Новый</button><button id="bCopy">Копировать</button><button id="bDel">Удалить</button></div>
+<p class="note">Комиссия продажи: Playerok 20%, DIP-X 5%, YooMarket 17% — по вашим данным. Комиссию вывода и налог укажите сами. Свою площадку добавьте кнопкой «Новый».</p>
+</div>
+
+</div>
+<div id="conv" hidden>
+<div class="card"><div class="grid">
+<label class="full">Сумма<input id="ca" inputmode="decimal"></label>
+<label>Из<select id="cf"></select></label>
+<label>В<select id="ct"></select></label>
+</div>
+<div class="btns"><button id="cs">⇄ Поменять</button><button id="cc">Копировать</button><button id="cx">Очистить</button><button id="cu">⟳ Обновить</button></div></div>
+<div class="card" id="cres"></div>
+<div class="card" id="cmeta"></div>
+<div class="card"><h2>Быстрые пары</h2><div class="btns" id="cq"></div></div>
+<details class="card"><summary>Курсы (можно править)</summary><div id="cr" class="grid"></div><div class="btns"><button id="crs">Сбросить к снимку</button></div><p class="note" id="cn"></p></details>
+<p class="note">Рыночный курс может отличаться от курса покупки или продажи на конкретной бирже или площадке. Курсы в прототипе — снимок, не живая котировка: в боевой версии их отдаёт сервер.</p>
+</div>
+<div id="goods" hidden>
+<div class="card"><h2>Новый товар</h2><div class="grid"><label class="full">Название<input id="gn"></label><label>Закупка, ₽<input id="gb" inputmode="decimal"></label><label>План. цена продажи<input id="gp" inputmode="decimal"></label><label>Количество<input id="gq" inputmode="numeric" value="1"></label></div><div class="btns"><button id="gadd">Добавить</button></div><p class="note neg" id="gm"></p><p class="note">Комиссии берутся из активного профиля в разделе «Прибыль».</p></div>
+<div class="card" id="gsum"></div><div class="card" id="glist"></div></div>
+<div id="stats" hidden><div class="card"><label>Период<select id="sp"><option value="day">Сегодня</option><option value="week">Неделя</option><option value="month" selected>Месяц</option><option value="year">Год</option><option value="all">Всё время</option></select></label></div><div class="card" id="sbody"></div></div>
+<div id="goals" hidden><div class="card" id="obody"></div></div>
+<div id="help" hidden><div class="card"><h2>Поддержать FlipCalc</h2><p class="note" style="font-size:14px">Поддержка добровольная и не открывает платных функций. Каждый внешний платёж проходит через отдельного провайдера. Переход по ссылке не подтверждает оплату.</p><div id="hm"></div></div><div class="card"><h2>О проекте</h2><p class="note" style="font-size:14px">FlipCalc бесплатный. Калькулятор и конвертеры не ограничиваются и не будут закрыты подпиской.</p><p class="note" style="font-size:14px">Платёжные данные в приложении не хранятся: ссылки ведут на страницы провайдеров. Рекламные и партнёрские материалы, если появятся, будут помечены.</p></div></div>
+<div id="tools" hidden>
+<div id="tbox"></div></div>
+<div id="api" hidden>
+<details class="card"><summary>Как подключить магазин — инструкция</summary>
+<p class="note" style="font-size:14px"><b>1. Получите токен.</b> В панели магазина откройте Мой магазин → Интеграции → API токен, создайте токен и скопируйте его. Токен — как пароль: никому его не показывайте.</p>
+<p class="note" style="font-size:14px"><b>2. Настройте подключение.</b> Нажмите «Шаблон YooMarket», затем вставьте токен в поле «API-ключ». Остальное заполнится само.</p>
+<p class="note" style="font-size:14px"><b>3. Проверьте.</b> Нажмите «Проверить». Зелёная точка и «200 OK» — всё работает.</p>
+<p class="note" style="font-size:14px"><b>4. Пользуйтесь.</b> «Баланс» — деньги на счёте магазина. «Заказы» — последние заказы. «Импорт товаров» — переносит ваши объявления в «Товары»; после этого впишите закупку у каждого товара. «Импорт продаж» — переносит выполненные заказы в «Аналитику» с расчётом прибыли. Повторный импорт дубли не создаёт.</p>
+<p class="note" style="font-size:14px"><b>Если ошибка:</b><br>• «Запрос не прошёл» — приложение открыто не через запуск с прокси или сервер выключен.<br>• 401 — токен неверный или скопирован не целиком.<br>• 403 — интеграция выключена или магазин заблокирован.<br>• 404 — неверный «Базовый URL» (для запуска с прокси: /api/yoo).<br>• 429 — слишком много запросов, подождите минуту.</p>
+<p class="note" style="font-size:14px"><b>Безопасность.</b> Токен хранится только на этом устройстве. Если токен кто-то увидел, перевыпустите его в панели магазина.</p>
+</details>
+<div class="card"><h2>Подключение маркетплейса</h2>
+<div class="grid">
+<label class="full">Подключение<select id="asel"></select></label>
+<label class="full">Название<input id="an" placeholder="Например, Playerok"></label>
+<label class="full">Базовый URL API<input id="au" inputmode="url" autocomplete="off" placeholder="https://api.example.com"></label>
+<label class="full">API-ключ<input id="ak" type="password" autocomplete="off" spellcheck="false"></label>
+<label>Как передавать ключ<select id="ah"><option value="bearer">Authorization: Bearer</option><option value="x-api-key">Заголовок X-API-Key</option><option value="query">Параметр ?api_key=</option></select></label>
+<label>Путь для проверки<input id="ap" placeholder="/me"></label>
+</div>
+<div class="btns"><button id="apre">Шаблон YooMarket</button><button id="atest">Проверить</button><button id="ashow">Показать ключ</button><button id="anew">Новое</button><button id="adel">Удалить</button></div>
+<p class="note neg" id="am"></p>
+<p class="note">Ключ хранится только на этом компьютере (папка данных FlipCalc) и не отправляется никуда, кроме Yoomarket.</p></div>
+<div class="card"><h2>Данные магазина</h2>
+<div class="btns"><button id="abal">Баланс</button><button id="aord">Заказы</button><button id="aadi">Импорт товаров</button><button id="aimp">Импорт продаж</button></div>
+<p class="note">Импорт товаров переносит объявления в «Товары» (закупку укажите вручную). Импорт продаж берёт заказы со статусом success: выручка — сумма заказа, комиссия — разница с net, прибыль = net − закупка. Налог не учитывается. Повторный импорт дубли не создаёт.</p></div>
+<div class="card"><h2>Telegram-бот</h2>
+<p class="note">Уведомления о заказах и сообщениях покупателей приходят вам в Telegram, и там же можно отвечать (Reply на сообщение бота). Работает, пока запущен ЗАПУСК.bat. Для этого создайте своего бота в @BotFather и вставьте его токен.</p>
+<label class="full">Токен вашего бота<input id="tbt" type="password" autocomplete="off" spellcheck="false" placeholder="123456:AAH..."></label>
+<div class="btns"><button id="ton">Добавить бота</button></div>
+<div class="note" id="tst"></div></div>
+<div class="card" id="aout"></div></div>
+<div id="ad" hidden><div class="card"><h2>Шаблоны объявлений</h2><label>Название шаблона<input id="tn"></label><div class="btns"><button id="tsv">Сохранить шаблон</button></div><div id="tl"></div><p class="note" id="tm">Сохраняет заголовок, описание и текст выдачи из текущего объявления.</p></div>
+<div class="card"><h2>Объявление</h2><div class="grid">
+<label class="full">Заголовок<input id="dt" maxlength="100" placeholder="Например: UC Pubg Mobile 660 моментально"><span class="note" id="dtc"></span></label>
+<div class="full btns" style="margin:0"><button class="cpb" data-cp="dt">Копировать заголовок</button></div>
+<label class="full">Тип объявления<select id="dy"><option value="simple">Ограниченная — ручная выдача</option><option value="unlimited">Безлимитная — ручная выдача</option><option value="auto-delivery">Авто-выдача (ключи, коды)</option></select></label>
+<label class="full">Категория<input id="dcs" autocomplete="off" placeholder="Начните вводить название…"></label>
+<div class="full" id="dcl"></div>
+<div class="full btns" style="margin:0"><button id="dcload">Загрузить категории</button></div>
+<p class="note full" id="dcc"></p>
+<div class="full grid" id="dfl"></div>
+<label class="full">Описание<textarea id="dd" rows="6" maxlength="2048" placeholder="От 20 символов. Без ссылок и контактов."></textarea><span class="note" id="ddc"></span></label>
+<div class="full btns" style="margin:0"><button class="cpb" data-cp="dd">Копировать описание</button></div>
+<div class="full"><div class="note">Изображения (до 8, JPEG или PNG до 5 МБ)</div><input id="dph" type="file" accept="image/jpeg,image/png" multiple><div id="dpv" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div></div>
+</div></div>
+<div class="card"><h2>Цена и комиссия</h2><div class="grid">
+<label>Цена продажи, ₽<input id="dp" inputmode="decimal"></label>
+<label>Закупка, ₽ (необязательно)<input id="dbuy" inputmode="decimal"></label>
+<label class="full">Площадка (комиссия)<select id="dpr"></select></label>
+<label>Хочу получить чистыми, ₽<input id="dwant" inputmode="decimal"></label>
+<div style="display:flex;align-items:flex-end"><button id="dsolve" class="cpb" style="padding:11px 12px">Подставить цену</button></div>
+</div><div id="dpres" style="margin-top:8px"></div><div class="btns"><button class="cpb" data-cp="dp">Копировать цену</button></div></div>
+<div class="card"><h2>Приветственные сообщения</h2><p class="note">Площадка отправит их покупателю автоматически при смене статуса заказа. Передача контактных данных запрещена.</p><div id="dg"></div></div>
+<div class="card"><div class="btns" style="margin-top:0"><button id="dcr">Создать черновик</button><button class="cpb" data-cp="all">Скопировать всё</button><button id="dclr">Очистить</button></div><p class="note neg" id="dm"></p><div id="dout"></div>
+<p class="note">Черновик не виден покупателям. Публикуйте его кнопкой после создания. Лимит площадки — 50 новых объявлений в час.</p></div>
+</div>
+<div id="set" hidden><div class="card"><h2>Тема</h2><div class="btns"><button id="th">Сменить тему</button></div></div><div class="card"><h2>Язык</h2><label>Язык приложения<select id="lg"></select></label><div class="btns"><button id="lgr">Сбросить язык</button></div><p class="note">Переведены меню, названия разделов и основные подписи. Всё, что не переведено, остаётся на русском.</p></div><div class="card"><h2>Резервная копия</h2><textarea id="bk" rows="3" placeholder="Вставьте сюда копию для восстановления"></textarea><div class="btns"><button id="bkc">Скопировать копию</button><button id="bkr">Восстановить</button></div><p class="note" id="bkm"></p></div><div class="card"><h2>Разделы приложения</h2><div id="sl"></div><p class="note" id="sm"></p><div class="btns"><button id="srs">Сбросить настройки</button></div><p class="note">Скрытый раздел пропадает из меню, но профили, курсы и расчёты сохраняются. Порядок меняется стрелками.</p></div></div>
+<script>
+/* Mini App: вход через подпись Telegram, дальше все запросы к серверу идут с сессией владельца */
+(function(){const tg=window.Telegram&&Telegram.WebApp;if(!tg||!tg.initData)return;
+ let sess=null,pend=null;const of=window.fetch.bind(window);
+ const auth=()=>pend||(pend=(async()=>{let err;for(let i=0;i<5;i++){try{const r=await of('/api/telegram/webapp-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});const j=await r.json();if(!r.ok){const e=new Error(j.detail||'Ошибка входа');e.fatal=1;throw e}sess=j.session;return}catch(e){err=e;if(e.fatal)break;await new Promise(z=>setTimeout(z,600*(i+1)))}}if(!err.fatal)pend=null;throw err})());
+ window.fetch=async(u,o)=>{o=o||{};const url=String(u);if(!url.startsWith('/api/')||url==='/api/telegram/webapp-auth')return of(u,o);
+  try{await auth();const d=document.getElementById('fcdeny');if(d)d.remove()}catch(e){if(!document.getElementById('fcdeny')){const b=document.createElement('div');b.id='fcdeny';b.style.cssText='background:#3a1512;color:#ff453a;padding:10px;text-align:center;font-size:14px';b.textContent='Нет доступа: '+e.message;document.body.prepend(b)}return new Response(JSON.stringify({detail:e.message}),{status:403})}
+  return of(u,Object.assign({},o,{headers:Object.assign({},o.headers||{},{Authorization:'Bearer '+sess})}))}})();
+const MODES=[['m','Наценка'],['p','Цена'],['t','Прибыль'],['b','Безубыток'],['c','Таблица наценок']];
+const DEF={mode:'m',buy:100,extra:0,markup:20,price:130,target:20,act:0,
+profiles:[{name:'Пример (замените)',fp:5,ff:0,wp:3,wmin:30,wb:'after',dec:2,tax:0}]};
+let S;
+try{S=JSON.parse(localStorage.getItem('fc1')||'null')}catch(e){S=null}
+if(!S||!S.profiles||!S.profiles.length)S=JSON.parse(JSON.stringify(DEF));
+const $=id=>document.getElementById(id);
+var _pt;function push(){clearTimeout(_pt);_pt=setTimeout(()=>fetch('/api/local/state',{method:'POST',headers:{'X-FlipCalc':'1','Content-Type':'application/json'},body:JSON.stringify(S)}).catch(()=>{}),800)}
+const save=()=>{try{S._ts=Date.now();localStorage.setItem('fc1',JSON.stringify(S))}catch(e){}push()};
+const P=()=>S.profiles[S.act]||S.profiles[0];
+const num=v=>parseFloat(String(v).replace(',','.'))||0;
+const rd=(x,d)=>Math.round((x+Number.EPSILON)*10**d)/10**d;
+const fmt=(n,d)=>(n<0?'−':'')+Math.abs(n).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d})+' ₽';
+
+function calc(Pr,p,buy,extra){
+  const d=+p.dec;
+  const sf=rd(Pr*p.fp/100+p.ff,d), after=Pr-sf;
+  const base=p.wb==='after'?after:Pr;
+  const wf=after>0?rd(Math.max(base*p.wp/100,p.wmin),d):0;
+  const net=rd(after-wf,d), tax=net>0?rd(net*(p.tax||0)/100,d):0, cost=buy+extra, profit=rd(net-tax-cost,d);
+  return{Pr,sf,wf,tax,net,cost,profit,roi:cost>0?profit/cost*100:0};
+}
+function solve(T,p,buy,extra){
+  const d=+p.dec,R=(buy+extra+T)/(1-(p.tax||0)/100),fp=p.fp/100,wp=p.wp/100;
+  let kA,PA;
+  if(p.wb==='after'){kA=(1-fp)*(1-wp);PA=(R+p.ff*(1-wp))/kA}
+  else{kA=1-fp-wp;PA=(R+p.ff)/kA}
+  const kB=1-fp;
+  if(kA<=0||kB<=0)return null;
+  const PB=(R+p.ff+p.wmin)/kB, st=10**-d;
+  let x=Math.ceil(Math.max(PA,PB)*10**d-1e-9)/10**d;
+  for(let i=0;i<200&&calc(x,p,buy,extra).profit<T-1e-9;i++)x=rd(x+st,d);
+  return x;
+}
+function render(){
+  const p=P(),d=+p.dec,buy=S.buy,extra=S.extra,m=S.mode,bs=S.mb==='cost'?buy+extra:buy;
+  let h='';
+  if(m==='c'){
+    h='<h2>Прибыль при разной наценке</h2><table><tr><th>Наценка</th><th>Цена</th><th>Прибыль</th><th>ROI</th></tr>';
+    S.mk=S.mk||[5,10,15,17,20,30,50,100];[...S.mk].sort((a,b)=>a-b).forEach(k=>{
+      const c=calc(rd(bs*(1+k/100),d),p,buy,extra);
+      h+=`<tr><td>${k}%</td><td>${fmt(c.Pr,d)}</td><td class="${c.profit<0?'neg':'pos'}">${fmt(c.profit,d)}</td><td>${c.roi.toFixed(1)}%</td></tr>`;
+    });
+    $('res').innerHTML=h+'</table><div class="btns">'+[...S.mk].sort((a,b)=>a-b).map(k=>`<button data-mkdel="${k}">${k}% ✕</button>`).join('')+'</div><div class="btns"><input id="mka" inputmode="decimal" placeholder="Своя наценка, %" style="width:150px;margin:0"><button id="mkadd">+ Добавить</button></div>';return;
+  }
+  let Pr;
+  if(m==='m')Pr=rd(bs*(1+S.markup/100),d);
+  else if(m==='p')Pr=S.price;
+  else Pr=solve(m==='t'?S.target:0,p,buy,extra);
+  if(Pr===null){$('res').innerHTML='<h2>Результат</h2><div class="neg">Невозможно: комиссии в сумме 100% и больше.</div>';return}
+  const c=calc(Pr,p,buy,extra),loss=c.profit<0;
+  const head=m==='b'?'Минимальная цена продажи':m==='t'?'Нужно продать за':'Чистая прибыль';
+  const big=(m==='b'||m==='t')?`<div class="big">${fmt(c.Pr,d)}</div><div class="sub ${loss?'neg':'pos'}">Прибыль: ${fmt(c.profit,d)}</div>`
+    :`<div class="big ${loss?'neg':'pos'}">${fmt(c.profit,d)}</div><div class="sub">${loss?'Убыток':'Прибыль'} · рентабельность ${c.roi.toFixed(1)}%</div>`;
+  h=`<h2>${head}</h2>${big}
+  <div class="row"><span>Закупка</span><span>${fmt(buy,d)}</span></div>
+  <div class="row"><span>Доп. расходы</span><span>${fmt(extra,d)}</span></div>
+  <div class="row"><span>Цена продажи</span><span>${fmt(c.Pr,d)}</span></div>
+  <div class="row"><span>Комиссия продажи</span><span>${fmt(c.sf,d)}</span></div>
+  <div class="row"><span>Комиссия вывода</span><span>${fmt(c.wf,d)}</span></div>
+  <div class="row"><span>Налог</span><span>${fmt(c.tax,d)}</span></div>
+  <div class="row"><span>Общие расходы</span><span>${fmt(c.cost+c.sf+c.wf+c.tax,d)}</span></div>
+  <div class="row"><span>На руки (после налога)</span><span>${fmt(c.net-c.tax,d)}</span></div>`;
+  $('res').innerHTML=h;
+}
+function tabs(){
+  $('tabs').innerHTML=MODES.map(([k,t])=>`<button data-k="${k}" class="${S.mode===k?'on':''}">${t}</button>`).join('');
+  document.querySelectorAll('[data-m]').forEach(e=>e.hidden=!e.dataset.m.includes(S.mode));
+}
+function sel(){$('sel').innerHTML=S.profiles.map((p,i)=>`<option value="${i}" ${i===S.act?'selected':''}>${p.name.replace(/</g,'&lt;')}</option>`).join('')}
+function sync(){
+  ['buy','extra','markup','price','target'].forEach(k=>$(k).value=S[k]);
+  const p=P();['fp','ff','wp','wmin','tax','wb','dec','name'].forEach(k=>$(k).value=p[k]??'');$('mb').value=S.mb||'buy';
+  sel();
+}
+$('tabs').onclick=e=>{const k=e.target.dataset.k;if(k){S.mode=k;save();tabs();render()}};
+['buy','extra','markup','price','target'].forEach(k=>$(k).oninput=e=>{S[k]=num(e.target.value);save();render()});
+$('mb').onchange=e=>{S.mb=e.target.value;save();render()};
+['fp','ff','wp','wmin','tax'].forEach(k=>$(k).oninput=e=>{P()[k]=num(e.target.value);save();render()});
+['wb','dec'].forEach(k=>$(k).onchange=e=>{P()[k]=k==='dec'?+e.target.value:e.target.value;save();render()});
+$('name').oninput=e=>{P().name=e.target.value||'Без названия';save();sel()};
+$('sel').onchange=e=>{S.act=+e.target.value;save();sync();render()};
+$('bNew').onclick=()=>{S.profiles.push({id:uid(),name:'Новый профиль',fp:0,ff:0,wp:0,wmin:0,tax:0,wb:'after',dec:2});S.act=S.profiles.length-1;save();sync();render()};
+$('bCopy').onclick=()=>{const c=JSON.parse(JSON.stringify(P()));c.name+=' (копия)';c.id=uid();S.profiles.push(c);S.act=S.profiles.length-1;save();sync();render()};
+$('bDel').onclick=()=>{if(S.profiles.length<2)return;S.profiles.splice(S.act,1);S.act=0;save();sync();render()};
+/* ===== Конвертер ===== */
+const CUR=[['RUB','Рубль',0,1],['USD','Доллар США',0,82.1516],['EUR','Евро',0,92.0322],['CNY','Юань',0,12.3149],['TON','Toncoin',1,1.07],['USDT','Tether',1,1],['USDC','USD Coin',1,1],['BTC','Bitcoin',1,77000],['ETH','Ethereum',1,2260],['SOL','Solana',1,100],['BNB','BNB',1,700]];
+const QP=[['TON','RUB'],['USDT','RUB'],['BTC','RUB'],['USD','RUB'],['EUR','RUB'],['RUB','TON'],['TON','USDT']];
+S.rates=S.rates||{};S.cv=S.cv||{a:1,f:'TON',t:'RUB'};
+function fillRates(reset){if(reset)S.rates={};CUR.forEach(c=>{if(!(c[0] in S.rates))S.rates[c[0]]=c[3]})}
+fillRates();
+const rub=c=>{const t=CUR.find(x=>x[0]===c);return t[2]?S.rates[c]*S.rates.USD:S.rates[c]};
+const nf=v=>{const a=Math.abs(v);return v.toLocaleString('ru-RU',{maximumFractionDigits:a>=100?2:a>=1?4:8})};
+function cRender(){cMeta();
+  const {a,f,t}=S.cv,one=rub(f)/rub(t),v=a*one;
+  $('cres').innerHTML=isFinite(v)?`<div class="sub">${nf(a)} ${f} =</div><div class="big">${nf(v)} ${t}</div><div class="row"><span>1 ${f}</span><span>${nf(one)} ${t}</span></div><div class="row"><span>1 ${t}</span><span>${nf(1/one)} ${f}</span></div>`:'<div class="neg">Укажите ненулевые курсы.</div>';
+}
+function cInit(){
+  const o=CUR.map(c=>`<option value="${c[0]}">${c[0]} · ${c[1]}</option>`).join('');
+  $('cf').innerHTML=o;$('ct').innerHTML=o;
+  $('cf').value=S.cv.f;$('ct').value=S.cv.t;$('ca').value=S.cv.a;
+  $('cq').innerHTML=QP.map(([f,t])=>`<button data-f="${f}" data-t="${t}">${f} → ${t}</button>`).join('');
+  $('cr').innerHTML=CUR.filter(c=>c[0]!=='RUB').map(c=>`<label>${c[0]}, ${c[2]?'$':'₽'} за 1<input data-c="${c[0]}" inputmode="decimal" value="${S.rates[c[0]]}"></label>`).join('');
+  $('cn').textContent='Фиат: ЦБ РФ, курсы на 14–16.11.2026. TON: ≈1,07 $ на 14.11.2026 (19:44 UTC). BTC, ETH, SOL, BNB, USDT, USDC — ориентир на середину ноября 2026, не точная котировка: обновите вручную. Крипта считается через курс доллара ЦБ.';
+}
+/* ===== Статус курсов (та же логика, что на сервере: fresh/updating/stale/error) ===== */
+const API='/api/rates',ST={busy:false,err:''};
+S.meta=S.meta||{};
+const DEFM={RUB:{src:'ЦБ РФ',t:'2026-11-14T00:00:00Z'},USD:{src:'ЦБ РФ',t:'2026-11-14T00:00:00Z'},EUR:{src:'ЦБ РФ',t:'2026-11-14T00:00:00Z'},CNY:{src:'ЦБ РФ',t:'2026-11-14T00:00:00Z'},TON:{src:'снимок рынка',t:'2026-11-14T19:44:00Z',ch:-4.41},USDT:{src:'ориентир',t:null},USDC:{src:'ориентир',t:null},BTC:{src:'ориентир',t:null},ETH:{src:'ориентир',t:null},SOL:{src:'ориентир',t:null},BNB:{src:'ориентир',t:null}};
+const gm=c=>S.meta[c]||DEFM[c]||{src:'—',t:null};
+const isCr=c=>!!CUR.find(x=>x[0]===c)[2];
+const fmtT=t=>new Date(t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+function st(c){const m=gm(c);if(m.src==='вручную')return'manual';if(!m.t)return ST.err?'error':'stale';const age=Date.now()-new Date(m.t).getTime(),ttl=isCr(c)?600e3:72*3600e3;if(age<=ttl)return'fresh';return ST.err?'error':'stale'}
+function cMeta(){
+  const {f,t}=S.cv,cs=[...new Set([f,t])],R={fresh:0,manual:1,stale:2,error:3};
+  const s=ST.busy?'updating':cs.map(st).reduce((a,b)=>R[b]>R[a]?b:a,'fresh');
+  const L={fresh:'Актуально',manual:'Задано вручную',stale:'Устарело',error:'Ошибка обновления',updating:'Обновляется…'};
+  const rows=cs.map(c=>{const m=gm(c),ch=m.ch;return `<div class="row"><span>${c}</span><span>${m.src} · ${m.t?fmtT(m.t):'нет даты'}${typeof ch==='number'?` · <b class="${ch<0?'neg':'pos'}">${ch>0?'+':''}${ch.toFixed(2)}% за 24ч</b>`:''}</span></div>`}).join('');
+  $('cmeta').innerHTML=`<div class="stat"><i class="dot ${s}"></i>${L[s]}</div>${ST.err?`<p class="note neg">${ST.err}</p>`:''}${rows}`;
+}
+function applyServer(j){
+  const A=j.assets||{},ru=A.RUB&&+A.RUB.price_usd;if(!(ru>0))throw new Error('no RUB');
+  CUR.forEach(([c,,k])=>{const a=A[c];if(!a||!(+a.price_usd>0))return;
+    S.rates[c]=k?+a.price_usd:(c==='RUB'?1:+a.price_usd/ru);
+    S.meta[c]={src:a.source,t:a.last_success_at,ch:a.change_24h==null?null:+a.change_24h}});
+}
+async function cRefresh(){
+  ST.busy=true;ST.err='';cRender();
+  try{const ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);
+    const r=await fetch(API+'/refresh',{method:'POST',signal:ctl.signal});
+    if(!r.ok)throw new Error('HTTP '+r.status);applyServer(await r.json());
+  }catch(e){ST.err='Сервер курсов недоступен. Показаны последние сохранённые курсы.'}
+  ST.busy=false;save();cRender();
+}
+$('cu').onclick=cRefresh;
+function cSet(k,v){S.cv[k]=v;save();$('cf').value=S.cv.f;$('ct').value=S.cv.t;cRender()}
+$('ca').oninput=e=>cSet('a',num(e.target.value));
+$('cf').onchange=e=>cSet('f',e.target.value);
+$('ct').onchange=e=>cSet('t',e.target.value);
+$('cs').onclick=()=>{const f=S.cv.f;S.cv.f=S.cv.t;S.cv.t=f;cSet('a',S.cv.a)};
+$('cx').onclick=()=>{$('ca').value='';cSet('a',0)};
+$('cc').onclick=async e=>{const b=e.target,v=nf(S.cv.a*rub(S.cv.f)/rub(S.cv.t));try{await navigator.clipboard.writeText(v);b.textContent='Скопировано'}catch(x){b.textContent=v}setTimeout(()=>b.textContent='Копировать',1500)};
+$('cq').onclick=e=>{const d=e.target.dataset;if(d.f){S.cv.f=d.f;S.cv.t=d.t;if(!S.cv.a)S.cv.a=1;$('ca').value=S.cv.a;cSet('f',d.f)}};
+$('cr').oninput=e=>{const c=e.target.dataset.c,v=num(e.target.value);if(c&&v>0){S.rates[c]=v;S.meta[c]={src:'вручную',t:new Date().toISOString(),ch:null};save();cRender()}};
+$('crs').onclick=()=>{fillRates(true);S.meta={};ST.err='';save();cInit();cRender()};
+const SEC={calc:'Прибыль',conv:'Конвертер',goods:'Товары',stats:'Аналитика',goals:'Цели',api:'API',ad:'Объявление',help:'Поддержка'};
+const SUB={calc:'Комиссии и наценки',conv:'Валюты и крипта',goods:'Учёт и остатки',stats:'Прибыль и статистика',goals:'Планы заработка',api:'Маркетплейсы',ad:'Создать через API',help:'Помощь проекту'};
+const IC={calc:'<rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8.5 7.5h7M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/>',conv:'<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>',goods:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM4 7.5l8 4.5 8-4.5M12 12v9"/>',stats:'<path d="M4 20h16M7 17v-4M11 17V9M15 17v-6M19 17V6"/>',goals:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',api:'<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>',ad:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',help:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>'};
+const ALL=Object.keys(SEC),O0=S.order||[];
+S.order=[...O0.filter(k=>SEC[k]),...ALL.filter(k=>!O0.includes(k))];S.hide=S.hide||{};
+function tiles(){$('tiles').innerHTML=vis().map(k=>`<button class="tile" data-go="${k}"><svg viewBox="0 0 24 24">${IC[k]}</svg><b>${SEC[k]}</b><span>${SUB[k]}</span></button>`).join('')}
+/* ===== Товары, сделки, аналитика, цели ===== */
+S.goods=S.goods||[];S.deals=S.deals||[];S.goals=S.goals||{day:0,week:0,month:0};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const GS={bought:'Куплен',listed:'Выставлен',sold:'Продан',returned:'Возвращён',off:'Снят с продажи'};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+S.profiles.forEach(p=>{if(!p.id)p.id=uid();if(p.tax==null)p.tax=0});
+S.goods.forEach(g=>{if(typeof g.pid==='number')g.pid=(S.profiles[g.pid]||S.profiles[0]).id});
+const PB=id=>S.profiles.find(p=>p.id===id)||P();
+const PRE=[['Playerok',20],['DIP-X',5],['YooMarket',17]];
+const mkP=(n,f)=>({id:uid(),name:n,fp:f,ff:0,wp:0,wmin:0,tax:0,wb:'after',dec:2});
+if(!S.pre7&&S.profiles.length===1&&S.profiles[0].name==='Пример (замените)'){S.profiles=PRE.map(([n,f])=>mkP(n,f));S.act=0}S.pre7=1;
+S.ad=S.ad||{g:['','',''],cat:null};
+const pStart=k=>{const d=new Date();d.setHours(0,0,0,0);if(k==='week')d.setDate(d.getDate()-(d.getDay()+6)%7);if(k==='month')d.setDate(1);if(k==='year')d.setMonth(0,1);return k==='all'?0:d.getTime()};
+const dl=k=>S.deals.filter(x=>x.t>=pStart(k)),sum=(a,f)=>a.reduce((s,x)=>s+f(x),0),tint=n=>n<0?'neg':'pos';
+const RW=(l,v,c)=>`<div class="row"><span>${l}</span><span class="${c||''}">${v}</span></div>`;
+function gRender(){
+  let inv=0,pot=0,av=0;
+  S.goods.forEach(g=>{const left=g.qty-g.sold;if(['sold','off'].includes(g.status))return;av+=left;inv+=g.buy*left;if(g.plan>0)pot+=calc(g.plan,PB(g.pid),g.buy,0).profit*left});
+  $('gsum').innerHTML=RW('Остаток, шт',av)+RW('Закуплено на',fmt(inv,2))+RW('Потенциальная прибыль',fmt(pot,2),tint(pot))+RW('Фактическая прибыль (всё время)',fmt(sum(S.deals,x=>x.profit),2),tint(sum(S.deals,x=>x.profit)));
+  $('glist').innerHTML=S.goods.length?S.goods.map(g=>{const left=g.qty-g.sold;
+    return `<div class="item"><div class="row"><b style="color:var(--tx)">${esc(g.name)}</b><select data-st="${g.id}">${Object.entries(GS).map(([k,l])=>`<option value="${k}" ${g.status===k?'selected':''}>${l}</option>`).join('')}</select></div><div class="note">Закупка ${fmt(g.buy,2)} · план ${g.plan>0?fmt(g.plan,2):'—'} · осталось ${left} из ${g.qty}${g.adId?' · объявление '+g.adId:''}</div><label style="margin-top:6px">Закупка за шт., ₽<input data-eb="${g.id}" inputmode="decimal" value="${g.buy||''}"></label>${left>0?`<div class="grid" style="margin-top:8px"><input data-sp="${g.id}" inputmode="decimal" placeholder="Цена продажи"><input data-sq="${g.id}" inputmode="numeric" value="1"></div><div class="btns"><button data-sell="${g.id}">Продать</button><button data-del="${g.id}">Удалить</button></div>`:`<div class="btns"><button data-del="${g.id}">Удалить</button></div>`}</div>`}).join(''):'<p class="note">Пока нет товаров. Добавьте первый выше.</p>';
+}
+$('gadd').onclick=()=>{const n=$('gn').value.trim(),b=num($('gb').value),pl=num($('gp').value),q=Math.floor(num($('gq').value));
+  if(!n||!(b>0)||!(q>0)){$('gm').textContent='Укажите название, закупку больше 0 и количество.';return}
+  $('gm').textContent='';S.goods.unshift({id:uid(),name:n,buy:b,plan:pl,qty:q,sold:0,status:'bought',pid:P().id});['gn','gb','gp'].forEach(i=>$(i).value='');$('gq').value=1;save();gRender()};
+$('glist').onclick=e=>{const t=e.target,id=t.dataset.sell||t.dataset.del;if(!id)return;const g=S.goods.find(x=>x.id===id);if(!g)return;
+  if(t.dataset.del)S.goods=S.goods.filter(x=>x!==g);
+  else{const pr=num(document.querySelector(`[data-sp="${id}"]`).value),q=Math.floor(num(document.querySelector(`[data-sq="${id}"]`).value)),left=g.qty-g.sold;
+    if(!(pr>0)||!(q>0)||q>left){$('gm').textContent=`Цена больше 0, количество от 1 до ${left}.`;return}
+    const p=PB(g.pid),c=calc(pr,p,g.buy,0);
+    S.deals.push({name:g.name,sell:pr,qty:q,rev:rd(pr*q,2),fees:rd((c.sf+c.wf+c.tax)*q,2),profit:rd(c.profit*q,2),mp:p.name,t:Date.now()});
+    g.sold+=q;if(g.sold>=g.qty)g.status='sold';$('gm').textContent=''}
+  save();gRender()};
+$('glist').onchange=e=>{const d=e.target.dataset,g=S.goods.find(x=>x.id===(d.st||d.eb));if(!g)return;if(d.eb)g.buy=Math.max(0,num(e.target.value));else g.status=e.target.value;save();gRender()};
+function sRender(){
+  const a=dl($('sp').value),n=a.length,pr=sum(a,x=>x.profit),top=[...a].sort((x,y)=>y.profit-x.profit),mp={};a.forEach(x=>mp[x.mp]=(mp[x.mp]||0)+x.profit);
+  $('sbody').innerHTML=n?RW('Выручка',fmt(sum(a,x=>x.rev),2))+RW('Комиссии и налог',fmt(sum(a,x=>x.fees),2))+RW('Чистая прибыль',fmt(pr,2),tint(pr))+RW('Продаж',n)+RW('Средняя прибыль на сделку',fmt(pr/n,2),tint(pr))
+   +'<h2 style="margin-top:14px">Самые прибыльные</h2>'+top.slice(0,3).map(x=>RW(esc(x.name),fmt(x.profit,2),tint(x.profit))).join('')
+   +(top.some(x=>x.profit<0)?'<h2 style="margin-top:14px">Убыточные сделки</h2>'+top.filter(x=>x.profit<0).slice(-3).reverse().map(x=>RW(esc(x.name),fmt(x.profit,2),'neg')).join(''):'')
+   +'<h2 style="margin-top:14px">По профилям комиссий</h2>'+Object.entries(mp).map(([k,v])=>RW(esc(k),fmt(v,2),tint(v))).join('')
+   :'<p class="note">За этот период нет продаж. Отметьте продажу в разделе «Товары».</p>';
+}
+$('sp').onchange=sRender;
+function oRender(){
+  $('obody').innerHTML=[['day','За день'],['week','За неделю'],['month','За месяц']].map(([k,l])=>{const g=S.goals[k]||0,cur=sum(dl(k),x=>x.profit),pc=g>0?Math.max(0,Math.min(100,cur/g*100)):0;
+    return `<div class="item"><label>${l}, цель, ₽<input data-g="${k}" inputmode="decimal" value="${g||''}" placeholder="0"></label>${g>0?`<div class="pg"><i style="width:${pc}%"></i></div>${RW('Текущий результат',fmt(cur,2),tint(cur))}${RW('Осталось до цели',fmt(Math.max(0,g-cur),2))}${RW('Выполнено',(cur/g*100).toFixed(0)+'%')}`:'<p class="note">Задайте цель, чтобы видеть прогресс.</p>'}</div>`}).join('');
+}
+$('obody').onchange=e=>{const k=e.target.dataset.g;if(k){S.goals[k]=num(e.target.value);save();oRender()}};
+/* ===== Поддержка: список способов приходит с сервера (админ-панель), без пересборки фронта ===== */
+let SM=[
+ {id:'stars',name:'Telegram Stars',mark:'★',desc:'Оплата внутри Telegram: готовые суммы и своя сумма. Работает через бота.',url:'',enabled:false,note:'Скоро'},
+ {id:'da',name:'DonationAlerts',mark:'D',desc:'Добровольный донат через DonationAlerts (DALink). Оплата на стороне сервиса, мы не получаем ваши платёжные данные.',url:'https://dalink.to/wekjd',enabled:true}];
+async function hLoad(){try{const r=await fetch('/api/support/methods');if(r.ok){const j=await r.json();if(Array.isArray(j.methods))SM=j.methods}}catch(e){}hRender()}
+function hRender(){
+  $('hm').innerHTML=SM.map(m=>{const ok=m.enabled&&/^https:\/\//.test(m.url||'');
+    const st=m.id==='stars'?(m.enabled?'Доступно':'Скоро'):ok?'Доступно':m.enabled?'Не настроено':'Отключено';
+    return `<div class="item"><div class="row" style="align-items:center"><span style="display:flex;align-items:center;color:var(--tx)"><i class="mk" style="font-style:normal">${esc(m.mark||m.name[0])}</i><b>${esc(m.name)}</b></span><span class="stt">${st}</span></div><p class="note">${esc(m.desc||'')}</p>${ok&&m.id!=='stars'?`<a class="lnk" href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">Перейти на сайт провайдера</a>`:''}</div>`}).join('');
+}
+const BROW='<div class="grid br" style="grid-template-columns:1fr 1fr 70px;margin-bottom:8px"><input placeholder="Купили, ₽" inputmode="decimal"><input placeholder="Продаёте, ₽" inputmode="decimal"><input placeholder="Шт" inputmode="numeric" value="1"></div>';
+function cmpRender(){
+  const b=num($('pcb').value),s=num($('pcs').value),e=num($('pce').value),rows=S.profiles.map(p=>({p,c:calc(s,p,b,e)})),best=Math.max(...rows.map(x=>x.c.profit));
+  $('cmpr').innerHTML=s>0?`<table><tr><th>Площадка</th><th>На руки</th><th>Прибыль</th></tr>${rows.map(({p,c})=>`<tr><td>${esc(p.name)}${c.profit===best?' ★':''}</td><td>${fmt(c.net-c.tax,2)}</td><td class="${tint(c.profit)}">${fmt(c.profit,2)}</td></tr>`).join('')}</table><p class="note">★ самый выгодный профиль. Комиссии берутся из ваших профилей.</p>`:'<p class="note">Введите цену продажи.</p>';
+}
+function batRender(){
+  let B=0,R=0,F=0,Pf=0,U=0;
+  document.querySelectorAll('#brows .br').forEach(r=>{const[i1,i2,i3]=r.querySelectorAll('input'),b=num(i1.value),s=num(i2.value),q=Math.floor(num(i3.value));
+    if(b>0&&s>0&&q>0){const c=calc(s,P(),b,0);B+=b*q;R+=s*q;F+=(c.sf+c.wf+c.tax)*q;Pf+=c.profit*q;U+=q}});
+  $('batr').innerHTML=U?RW('Штук',U)+RW('Закупка',fmt(B,2))+RW('Выручка',fmt(R,2))+RW('Комиссии и налог',fmt(F,2))+RW('Чистая прибыль',fmt(Pf,2),tint(Pf))+RW('Прибыль на штуку',fmt(Pf/U,2),tint(Pf)):'<p class="note">Заполните хотя бы одну строку: закупка, цена продажи, штук.</p>';
+}
+function chartHtml(){
+  const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);days.push(d.getTime())}
+  const v=days.map(t=>sum(S.deals.filter(x=>x.t>=t&&x.t<t+864e5),x=>x.profit)),mx=Math.max(1,...v.map(Math.abs));
+  return S.deals.length?`<div style="display:flex;align-items:flex-end;gap:4px;height:120px">${v.map((x,i)=>`<div title="${new Date(days[i]).toLocaleDateString('ru-RU')}: ${fmt(x,2)}" style="flex:1;height:${Math.max(2,Math.abs(x)/mx*100)}%;background:${x<0?'var(--r)':'var(--ac)'};border-radius:4px;opacity:${x?1:.25}"></div>`).join('')}</div><p class="note">Прибыль по дням, 14 дней. Всего: ${fmt(sum(v,x=>x),2)}. Красный столбик — убыток.</p>`:'<p class="note">Пока нет продаж. Отметьте продажу в разделе «Товары».</p>';
+}
+const tx=v=>typeof v==='number'?v:'"'+String(/^[=+\-@\t\r]/.test(String(v))?"'"+v:v).replace(/"/g,'""')+'"';
+function csv(k){
+  const rows=k==='deals'?[['Дата','Товар','Профиль','Шт','Цена продажи','Выручка','Комиссии и налог','Прибыль'],...S.deals.map(d=>[new Date(d.t).toISOString().slice(0,10),d.name,d.mp,d.qty,d.sell,d.rev,d.fees,d.profit])]
+   :[['Товар','Закупка','План. цена','Шт','Продано','Статус'],...S.goods.map(g=>[g.name,g.buy,g.plan,g.qty,g.sold,GS[g.status]])];
+  return rows.map(r=>r.map(tx).join(',')).join('\n');
+}
+function toolsRender(){
+  const L=(t,b)=>`<div class="card"><h2>${t}</h2>${b}</div>`;
+  $('tbox').innerHTML=L('Сравнение площадок',`<div class="grid" id="cmpf"><label>Купили за, ₽<input id="pcb" inputmode="decimal" value="${S.buy}"></label><label>Продаёте за, ₽<input id="pcs" inputmode="decimal" value="${S.price}"></label><label class="full">Другие расходы, ₽<input id="pce" inputmode="decimal" value="${S.extra}"></label></div><div id="cmpr" style="margin-top:10px"></div>`)
+   +L('Партия товаров',`<div id="brows">${BROW+BROW+BROW}</div><div class="btns"><button id="badd">+ Строка</button></div><div id="batr" style="margin-top:8px"></div>`)
+   +L('График прибыли',chartHtml())
+   +L('Экспорт в CSV',`<div class="btns"><button id="csvd">Сделки</button><button id="csvg">Товары</button><button id="csvc">Копировать</button></div><textarea id="csv" readonly rows="6" style="width:100%;margin-top:8px;background:#0a0713;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px"></textarea>`);
+  cmpRender();batRender()
+}
+$('tbox').oninput=e=>{if(e.target.closest('#cmpf'))cmpRender();if(e.target.closest('#brows'))batRender()};
+$('tbox').onclick=e=>{const id=e.target.id;
+  if(id==='badd')$('brows').insertAdjacentHTML('beforeend',BROW);
+  if(id==='csvd'||id==='csvg')$('csv').value=csv(id==='csvd'?'deals':'goods');
+  if(id==='csvc'){const t=$('csv'),b=e.target;t.select();try{navigator.clipboard.writeText(t.value);b.textContent='Скопировано'}catch(x){b.textContent='Выделено, скопируйте'}setTimeout(()=>b.textContent='Копировать',1500)}};
+$('toolc').onclick=()=>{S.view='tools';save();view();scrollTo(0,0)};
+$('toolc').onkeydown=e=>{if(e.key==='Enter')$('toolc').onclick()};
+$('tiles').onclick=e=>{const b=e.target.closest('[data-go]');if(b){S.view=b.dataset.go;save();view();scrollTo(0,0)}};
+$('back').onclick=()=>{S.view='home';save();view();scrollTo(0,0)};
+$('gset').onclick=()=>{S.view='set';view();scrollTo(0,0)};
+const vis=()=>S.order.filter(k=>!S.hide[k]);
+function view(){
+  const vs=vis();let v=S.view||'calc';
+  if(v!=='home'&&v!=='set'&&v!=='tools'&&!vs.includes(v))v='home';
+  $('home').hidden=v!=='home';$('bar').hidden=v==='home';$('ttl').textContent=v==='set'?'Настройки':v==='tools'?'Инструменты':(SEC[v]||'');
+  ['calc','conv','goods','stats','goals','api','ad','help','tools','set'].forEach(k=>$(k).hidden=k!==v);
+  if(v==='home')tiles();if(v==='set')setRender();if(v==='goods')gRender();if(v==='stats')sRender();if(v==='goals')oRender();if(v==='help')hRender();if(v==='tools')toolsRender();if(v==='api')aRender();if(v==='ad')dRender();tgBack(v);
+}
+function setRender(){
+  $('sl').innerHTML=S.order.map((k,i)=>`<div class="row"><span style="color:var(--tx)">${SEC[k]}</span><span class="ctl"><button data-mv="${i}" data-d="-1" ${i===0?'disabled':''}>▲</button><button data-mv="${i}" data-d="1" ${i===S.order.length-1?'disabled':''}>▼</button><label class="tg"><input type="checkbox" data-t="${k}" ${S.hide[k]?'':'checked'}><i></i></label></span></div>`).join('');
+}
+$('sl').onclick=e=>{const b=e.target.closest('button[data-mv]');if(!b||b.disabled)return;const i=+b.dataset.mv,j=i+ +b.dataset.d;[S.order[i],S.order[j]]=[S.order[j],S.order[i]];save();view()};
+$('sl').onchange=e=>{const k=e.target.dataset.t;if(!k)return;const on=e.target.checked;if(!on&&vis().length<2){$('sm').textContent='Должен остаться хотя бы один раздел.';setRender();return}$('sm').textContent='';S.hide[k]=!on;save();view()};
+$('srs').onclick=()=>{S.order=[...ALL];S.hide={};$('sm').textContent='';save();view()};
+$('sw').onclick=e=>{const v=e.target.dataset.v;if(v){S.view=v;save();view()}};
+/* ===== Telegram WebApp ===== */
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){try{TG.ready();TG.expand();TG.setHeaderColor('#000000');TG.setBackgroundColor('#000000');TG.BackButton.onClick(()=>$('back').onclick())}catch(e){}}
+function tgBack(v){if(TG&&TG.BackButton){try{v==='home'?TG.BackButton.hide():TG.BackButton.show()}catch(e){}}}
+/* ===== API маркетплейсов ===== */
+S.api=S.api||{list:[],act:0};
+const AC=()=>S.api.list[S.api.act];
+const aNew=()=>{S.api.list.push((L=>({id:uid(),name:'YooMarket',url:L?'/api/yoo':'https://api.yoo.market/integration/v1',hdr:L?'x-api-key':'bearer',path:'/check',key:''}))(/^(localhost|127\.0\.0\.1)$/.test(location.hostname)||!!(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)));S.api.act=S.api.list.length-1;save()};
+function aRender(){
+  if(!S.api.list.length)aNew();
+  const c=AC();
+  $('asel').innerHTML=S.api.list.map((x,i)=>`<option value="${i}" ${i===S.api.act?'selected':''}>${esc(x.name||'Без названия')}</option>`).join('');
+  $('an').value=c.name;$('au').value=c.url;$('ak').value=c.key;$('ah').value=c.hdr;$('ap').value=c.path;
+  $('ak').type='password';$('ashow').textContent='Показать ключ';$('am').textContent='';tStat();
+  $('aout').innerHTML='<p class="note">Нажмите «Проверить», чтобы увидеть ответ сервера.</p>';
+}
+[['an','name'],['au','url'],['ak','key'],['ap','path']].forEach(([i,k])=>$(i).oninput=e=>{AC()[k]=e.target.value.trim();save();if(k==='name')$('asel').selectedOptions[0].textContent=AC().name||'Без названия'});
+$('apre').onclick=()=>{const c=AC();c.name=c.name||'YooMarket';c.url='/api/yoo';c.hdr='x-api-key';c.path='/check';save();aRender();$('am').textContent='Шаблон применён. Вставьте токен и нажмите «Проверить».'};
+$('ah').onchange=e=>{AC().hdr=e.target.value;save()};
+$('asel').onchange=e=>{S.api.act=+e.target.value;save();aRender()};
+$('anew').onclick=()=>{aNew();aRender()};
+$('adel').onclick=()=>{S.api.list.splice(S.api.act,1);S.api.act=0;save();aRender()};
+$('ashow').onclick=()=>{const k=$('ak');k.type=k.type==='password'?'text':'password';$('ashow').textContent=k.type==='password'?'Показать ключ':'Скрыть ключ'};
+$('atest').onclick=async()=>{
+  const c=AC(),out=$('aout');let u;
+  try{u=new URL(c.url.replace(/\/+$/,'')+'/'+(c.path||'').replace(/^\/+/,''),location.href)}catch(e){$('am').textContent='Проверьте базовый URL и путь.';return}
+  if(u.protocol!=='https:'&&u.hostname!=='localhost'){$('am').textContent='Разрешены только адреса https://.';return}
+  if(!c.key){$('am').textContent='Вставьте API-ключ.';return}
+  $('am').textContent='';const shown=u.origin+u.pathname,h={Accept:'application/json'};
+  if(c.hdr==='bearer')h.Authorization='Bearer '+c.key;else if(c.hdr==='x-api-key')h['X-API-Key']=c.key;else u.searchParams.set('api_key',c.key);
+  out.innerHTML='<div class="stat"><i class="dot updating"></i>Запрос…</div>';
+  const t0=Date.now(),ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),10000);
+  try{
+    const r=await fetch(u,{headers:h,signal:ctl.signal,cache:'no-store',credentials:'omit'});
+    let b=await r.text();try{b=JSON.stringify(JSON.parse(b),null,2)}catch(e){}
+    out.innerHTML=`<div class="stat"><i class="dot ${r.ok?'':'error'}"></i>${r.status} ${esc(r.statusText||'')}</div>`+RW('Адрес',esc(shown))+RW('Время',(Date.now()-t0)+' мс')+RW('Тип',esc(r.headers.get('content-type')||'—'))
+      +`<pre style="white-space:pre-wrap;word-break:break-all;font-size:12px;color:var(--mu);max-height:320px;overflow:auto;margin:10px 0 0">${esc(b.slice(0,3000))}</pre>`;
+  }catch(e){
+    out.innerHTML='<div class="stat"><i class="dot error"></i>Запрос не прошёл</div><p class="note">Нет сети, превышено время ожидания или API не разрешает вызовы из браузера (CORS). Если так, укажите адрес своего сервера-прокси (см. yoo_proxy.py) и способ ключа «X-API-Key».</p>';
+  }finally{clearTimeout(tm)}
+};
+
+async function aReq(path,q,o){
+  const c=AC();let u;
+  try{u=new URL(c.url.replace(/\/+$/,'')+'/'+path.replace(/^\/+/,''),location.href)}catch(e){throw new Error('Проверьте базовый URL.')}
+  if(u.protocol!=='https:'&&u.hostname!=='localhost')throw new Error('Нужен адрес https://.');
+  if(!c.key)throw new Error('Вставьте API-ключ.');
+  Object.entries(q||{}).forEach(([k,v])=>u.searchParams.set(k,v));
+  const h={Accept:'application/json'};
+  if(c.hdr==='bearer')h.Authorization='Bearer '+c.key;else if(c.hdr==='x-api-key')h['X-API-Key']=c.key;else u.searchParams.set('api_key',c.key);
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),10000);
+  try{
+    const init={method:(o&&o.method)||'GET',headers:h,signal:ctl.signal,cache:'no-store',credentials:'omit'};
+    if(o&&o.json){h['Content-Type']='application/json';init.body=JSON.stringify(o.json)}
+    if(o&&o.form)init.body=o.form;
+    const r=await fetch(u,init);
+    if(r.status===401)throw new Error('401: токен отсутствует или недействителен.');
+    if(r.status===403)throw new Error('403: интеграция неактивна или магазин заблокирован.');
+        if(r.status===429)throw new Error('429: лимит запросов, подождите минуту.');
+    if(!r.ok){let t='';try{t=(await r.text()).slice(0,400)}catch(x){}throw new Error('Ошибка '+r.status+(t?': '+t:''))}
+    return await r.json();
+  }catch(e){
+    if(e&&e.name==='AbortError')throw new Error('Время ожидания вышло.');
+    if(e instanceof TypeError)throw new Error('Запрос не прошёл: сеть или CORS (сервер маркетплейса не разрешает вызовы из браузера, нужен свой сервер-прокси).');
+    throw e;
+  }finally{clearTimeout(tm)}
+}
+async function aAll(path,q,max){
+  let out=[],cur=null;
+  for(let i=0;i<(max||20);i++){
+    const j=await aReq(path,cur?Object.assign({},q,{cursor:cur}):q);
+    out=out.concat(j.data||[]);cur=j.links&&j.links.next_cursor;
+    if(!(j.meta&&j.meta.has_more)||!cur)break;
+  }
+  return out;
+}
+async function aRun(fn){
+  const out=$('aout');out.innerHTML='<div class="stat"><i class="dot updating"></i>Загрузка…</div>';
+  try{out.innerHTML=await fn()}catch(e){out.innerHTML=`<div class="stat"><i class="dot error"></i>Ошибка</div><p class="note neg">${esc(e.message||e)}</p>`}
+}
+$('abal').onclick=()=>aRun(async()=>{
+  const j=await aReq('/balance');
+  return '<h2>Баланс магазина</h2>'+(Array.isArray(j)&&j.length?j.map(b=>RW('Счёт #'+esc(b.id),esc(b.amount)+' '+esc(b.currency))).join(''):'<p class="note">Нет данных.</p>');
+});
+$('aord').onclick=()=>aRun(async()=>{
+  const j=await aReq('/orders'),L=j.data||[];
+  return '<h2>Последние заказы</h2>'+(L.length?L.map(o=>RW('#'+esc(o.id)+' · '+esc(o.status),o.amount?esc(o.amount.total)+' '+esc(o.amount.currency||''):'—')).join(''):'<p class="note">Заказов нет.</p>')+(j.meta&&j.meta.has_more?'<p class="note">Показана первая страница.</p>':'');
+});
+$('aadi').onclick=()=>aRun(async()=>{
+  const ads=await aAll('/ads',{status:'publish,unpublish,moderate'});
+  let add=0,skip=0,lim=0;
+  for(const a of ads){
+    if(S.goods.some(g=>g.adId===a.id)){skip++;continue}
+    const pl=+(a.price&&typeof a.price==='object'?a.price.amount:a.price)||0;
+    S.goods.unshift({id:uid(),name:String(a.title||'Объявление #'+a.id),buy:0,plan:pl,qty:Math.max(1,Math.floor(+a.stock)||1),sold:0,status:a.status==='publish'?'listed':'bought',pid:P().id,adId:a.id});add++;
+  }
+  save();
+  return '<h2>Импорт товаров</h2>'+RW('Найдено объявлений',ads.length)+RW('Добавлено',add)+RW('Уже были',skip)+'<p class="note">Откройте «Товары» и укажите закупку — от неё зависит прибыль.</p>';
+});
+$('aimp').onclick=()=>aRun(async()=>{
+  const ords=await aAll('/orders',{status:'success'},30),cid=AC().id;
+  let add=0,dup=0,upd=0,nob=0;
+  for(const o of ords){
+    const oid=cid+':'+o.id,g=S.goods.find(x=>x.adId===o.ad_id),buy=g?g.buy:0,d=S.deals.find(x=>x.oid===oid);
+    if(d){dup++;if(g&&g.buy>0){const p=rd(d.rev-d.fees-g.buy,2);if(p!==d.profit){d.profit=p;upd++}}continue}
+    const tot=num(o.amount&&o.amount.total),net=num(o.amount&&o.amount.net);
+    if(!(buy>0))nob++;
+    S.deals.push({name:g?g.name:'Заказ #'+o.id+(o.ad_id?' (объявл. '+o.ad_id+')':''),sell:tot,qty:1,rev:rd(tot,2),fees:rd(tot-net,2),profit:rd(net-buy,2),mp:AC().name||'API',t:Date.parse(o.created_at)||Date.now(),oid});add++;
+  }
+  save();
+  return '<h2>Импорт продаж</h2>'+RW('Заказов success',ords.length)+RW('Добавлено сделок',add)+RW('Уже были',dup)+(upd?RW('Пересчитано по закупке',upd):'')+(nob?RW('Без закупки (прибыль = net)',nob,'neg'):'')+(nob?'<p class="note">Импортируйте товары и укажите закупку, затем запустите импорт продаж ещё раз — прибыль пересчитается.</p>':'')+'<p class="note">Итоги — в разделе «Аналитика».</p>';
+});
+
+/* ===== Комиссии площадок и наценки ===== */
+function preRender(){$('pre').innerHTML=PRE.map(([n,f])=>`<button data-pre="${n}">+ ${n} ${f}%</button>`).join('')}
+$('pre').onclick=e=>{const n=e.target.dataset.pre;if(!n)return;const f=PRE.find(x=>x[0]===n)[1];let i=S.profiles.findIndex(p=>p.name===n);
+  if(i<0){S.profiles.push(mkP(n,f));i=S.profiles.length-1}S.act=i;save();sync();render()};
+$('res').onclick=e=>{const d=e.target.dataset;if(d.mkdel){S.mk=S.mk.filter(x=>x!=d.mkdel);save();render()}
+  if(e.target.id==='mkadd'){const v=num($('mka').value);if(v>0&&v<=1000&&!S.mk.includes(v)){S.mk.push(v);save();render()}}};
+preRender();
+/* ===== Конструктор объявления (через API) ===== */
+const G=[['created','Создал заказ (не оплатил)','Начать чат до оплаты? Можно обсудить детали с клиентом, например: «Детали аккаунта». Повышает конверсию.'],['wait','Оплатил заказ','Не публикуйте здесь логины и пароли. Сообщение придёт в чат после оплаты; можно добавить инструкцию для входа или получения.'],['confirmed','Выполнил заказ','Сообщение уйдёт в чат после нажатия «Выполнил» и завершения заказа.']];
+let CATS=null,FLT=[],PH=[];
+try{const j=JSON.parse(localStorage.getItem('fc_cats')||'null');if(j&&Date.now()-j.t<864e5)CATS=j.l}catch(e){}
+async function cp(t,b){let ok=1;try{await navigator.clipboard.writeText(t)}catch(e){const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(_){ok=0}x.remove()}
+  const o=b.dataset.o||b.textContent;b.dataset.o=o;b.textContent=ok?'Скопировано ✓':'Не удалось';setTimeout(()=>b.textContent=o,1500)}
+function dAll(){const a=S.ad;return [a.t||'','',a.d||'','','Цена: '+(a.p||'')+' ₽',...G.map((g,i)=>a.g[i]?'\n'+g[1]+':\n'+a.g[i]:'')].join('\n').trim()}
+function dCnt(){$('dtc').textContent=$('dt').value.length+'/100';$('ddc').textContent=$('dd').value.length+'/2048';G.forEach((g,i)=>{const e=$('gc'+i);if(e)e.textContent=$('g'+i).value.length+'/1024'})}
+function dPrice(){const p=S.profiles.find(x=>x.id===$('dpr').value)||P(),pr=num($('dp').value),b=num($('dbuy').value);
+  if(!(pr>0)){$('dpres').innerHTML='<p class="note">Введите цену — покажу комиссию и сумму на руки.</p>';return}
+  const c=calc(pr,p,b,0);
+  $('dpres').innerHTML=RW('Комиссия продажи ('+p.fp+'%)',fmt(c.sf,2))+(c.wf?RW('Комиссия вывода',fmt(c.wf,2)):'')+(c.tax?RW('Налог',fmt(c.tax,2)):'')+RW('На руки',fmt(c.net-c.tax,2),'pos')+(b>0?RW('Чистая прибыль',fmt(c.profit,2),tint(c.profit)):'')}
+function dPh(){$('dpv').innerHTML=PH.length?PH.map((f,i)=>`<div style="position:relative"><img src="${URL.createObjectURL(f)}" style="width:72px;height:72px;object-fit:cover;border-radius:10px"><button data-phd="${i}" class="cpb" style="position:absolute;top:2px;right:2px;padding:0 6px">✕</button></div>`).join(''):'<p class="note">Для публикации нужно хотя бы одно фото.</p>'}
+function dRender(){const a=S.ad;
+  $('dt').value=a.t||'';$('dd').value=a.d||'';$('dy').value=a.y||'simple';$('dp').value=a.p||'';$('dbuy').value=a.b||'';$('dcs').value=a.cat?a.cat.p:'';
+  $('dg').innerHTML=G.map((g,i)=>`<div class="item"><div class="row" style="align-items:center"><b style="color:var(--tx)">${g[1]}</b><button class="cpb" data-cp="g${i}">Копировать</button></div><p class="note">${g[2]}</p><textarea id="g${i}" data-g="${i}" rows="3" maxlength="1024">${esc(a.g[i]||'')}</textarea><div class="note" id="gc${i}">0/1024</div></div>`).join('');
+  $('dpr').innerHTML=S.profiles.map(p=>`<option value="${p.id}">${esc(p.name)} · ${p.fp}%</option>`).join('');
+  $('dpr').value=a.pr||(S.profiles.find(p=>/yoo/i.test(p.name))||P()).id;
+  $('dcc').textContent=CATS?'Категорий загружено: '+CATS.length:'Нажмите «Загрузить категории», затем начните вводить название.';
+  $('dm').textContent='';dCnt();dPrice();dPh();if(a.cat&&a.cat.f&&!FLT.length)fLoad(a.cat)}
+function dCats(q){const l=$('dcl');q=q.toLowerCase().trim();if(!q){l.innerHTML='';return}
+  if(!CATS){l.innerHTML='<p class="note">Сначала нажмите «Загрузить категории».</p>';return}
+  l.innerHTML=CATS.filter(c=>c.p.toLowerCase().includes(q)).slice(0,30).map(c=>`<button class="lnk" style="background:#2c2c2e;margin-top:6px;text-align:left" data-cat="${c.id}">${esc(c.p)}</button>`).join('')||'<p class="note">Ничего не найдено.</p>'}
+async function fLoad(c){FLT=[];$('dfl').innerHTML='';if(!c.f)return;
+  try{FLT=await aReq('/categories/'+c.id+'/filters')}catch(e){$('dfl').innerHTML=`<p class="note neg">${esc(e.message)}</p>`;return}
+  const lab=o=>esc(o.title||o.name||o.label||o.value||o.id),oid=o=>o.id!=null?o.id:o.option_id;
+  $('dfl').innerHTML=FLT.map(f=>{const h=esc(f.title)+(f.required?' *':'');
+    if(f.type==='select')return`<label class="full">${h}<select data-f="${f.id}"><option value="">—</option>${(f.options||[]).map(o=>`<option value="${oid(o)}">${lab(o)}</option>`).join('')}</select></label>`;
+    if(f.type==='multiselect')return`<div class="full"><div class="note">${h}</div>${(f.options||[]).map(o=>`<label style="display:inline-flex;gap:6px;margin:4px 10px 0 0"><input type="checkbox" style="width:auto;margin:0" data-f="${f.id}" value="${oid(o)}">${lab(o)}</label>`).join('')}</div>`;
+    if(f.type==='boolean')return`<label class="full" style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto;margin:0" data-f="${f.id}">${h}</label>`;
+    return`<label class="full">${h}<input data-f="${f.id}" ${f.type==='number'?'inputmode="decimal"':f.type==='date'?'type="date"':''}></label>`}).join('')}
+function fCollect(){const out=[];for(const f of FLT){const els=[...document.querySelectorAll('[data-f="'+f.id+'"]')];let n=0;
+  if(f.type==='select'){const v=els[0].value;if(v){out.push({filter_id:f.id,option_id:+v});n=1}}
+  else if(f.type==='multiselect')els.filter(x=>x.checked).forEach(x=>{out.push({filter_id:f.id,option_id:+x.value});n=1});
+  else if(f.type==='boolean'){out.push({filter_id:f.id,value:els[0].checked});n=1}
+  else{const v=els[0].value.trim();if(v){out.push({filter_id:f.id,value:f.type==='number'?num(v):v});n=1}}
+  if(f.required&&!n)return{err:'Заполните обязательный фильтр: '+f.title}}return{out}}
+$('ad').oninput=e=>{const t=e.target,a=S.ad;
+  if(t.id==='dt')a.t=t.value;else if(t.id==='dd')a.d=t.value;else if(t.id==='dp')a.p=t.value;else if(t.id==='dbuy')a.b=t.value;else if(t.id==='dpr')a.pr=t.value;else if(t.id==='dy')a.y=t.value;
+  else if(t.dataset.g!=null)a.g[+t.dataset.g]=t.value;else if(t.id==='dcs'){dCats(t.value);return}else return;
+  save();dCnt();dPrice()};
+$('dph').onchange=e=>{const m=$('dm');m.textContent='';for(const f of e.target.files){if(!/^image\/(jpeg|png)$/.test(f.type)){m.textContent='Только JPEG и PNG.';continue}if(f.size>5242880){m.textContent='Файл больше 5 МБ.';continue}if(PH.length<8)PH.push(f)}e.target.value='';dPh()};
+$('dsolve').onclick=()=>{const p=S.profiles.find(x=>x.id===$('dpr').value)||P(),x=solve(num($('dwant').value),p,num($('dbuy').value),0);
+  if(x===null||!(num($('dwant').value)>=0)){$('dm').textContent='Не получается посчитать: проверьте комиссии профиля.';return}$('dm').textContent='';$('dp').value=x;S.ad.p=x;save();dPrice()};
+$('dcload').onclick=async()=>{$('dcc').textContent='Загрузка категорий…';
+  try{const all=await aAll('/categories',{},40),by={};all.forEach(c=>by[c.id]=c);const nm=c=>String(c.title||c.name||c.id);
+    const path=c=>{const a=[];for(let x=c,i=0;x&&i<8;x=by[x.parent_id],i++)a.unshift(nm(x));return a.join(' › ')};
+    const leaf=all.filter(c=>c.is_leaf);CATS=(leaf.length?leaf:all).map(c=>({id:c.id,p:path(c),f:!!c.has_filters}));
+    try{localStorage.setItem('fc_cats',JSON.stringify({t:Date.now(),l:CATS}))}catch(e){}
+    $('dcc').textContent='Категорий загружено: '+CATS.length}catch(e){$('dcc').textContent=e.message}};
+$('dclr').onclick=()=>{S.ad={g:['','',''],cat:null};PH=[];FLT=[];$('dfl').innerHTML='';$('dout').innerHTML='';save();dRender()};
+$('dcr').onclick=async()=>{const m=$('dm'),a=S.ad,t=(a.t||'').trim(),d=(a.d||'').trim(),pr=num(a.p),b=$('dcr');m.textContent='';
+  const err=!AC()||!AC().key?'Сначала подключите магазин в разделе «API».':t.length<3?'Заголовок — от 3 до 100 символов.':!a.cat?'Выберите категорию из списка.':d.length<20?'Описание — от 20 символов.':!(pr>=0.1&&pr<=1e6)?'Цена — от 0,1 до 1 000 000 ₽.':null;
+  if(err){m.textContent=err;return}const fc=fCollect();if(fc.err){m.textContent=fc.err;return}
+  b.disabled=true;b.textContent='Создаю…';
+  try{let ids=[];
+    if(PH.length){const up=async n=>{const fd=new FormData();PH.forEach(f=>fd.append(n,f));return aReq('/media',{},{method:'POST',form:fd})};
+      let r;try{r=await up('files[]')}catch(e){if(!/422/.test(e.message))throw e;r=await up('files')}ids=r.map(x=>x.media_id)}
+    const gr={};G.forEach((g,i)=>{const v=(a.g[i]||'').trim();if(v)gr[g[0]]=v});
+    const body={title:t,type:a.y||'simple',category_id:a.cat.id,description:d,price:pr,has_chat:true};
+    if(ids.length)body.media_ids=ids;if(fc.out.length)body.filters=fc.out;if(Object.keys(gr).length)body.greetings=gr;
+    const r=await aReq('/ads',{},{method:'POST',json:body}),id=r.ad&&r.ad.id;PH=[];dPh();
+    $('dout').innerHTML=`<div class="stat"><i class="dot"></i>Черновик создан · объявление №${esc(id)}</div><div class="btns"><button data-pub="${id}">Опубликовать</button></div>`
+     +(body.type==='auto-delivery'?`<label style="margin-top:10px">Позиции авто-выдачи, по одной в строке (от 3 символов)<textarea id="dit" rows="4"></textarea></label><div class="btns"><button data-items="${id}">Загрузить позиции</button></div>`:'')+'<p class="note" id="dm2"></p>';
+  }catch(e){m.textContent=e.message}
+  b.disabled=false;b.textContent='Создать черновик'};
+$('dout').onclick=async e=>{const d=e.target.dataset,m=$('dm2');if(!m)return;
+  try{if(d.pub){if(!confirm('Отправить объявление на модерацию и публикацию?'))return;await aReq('/ads/'+d.pub+'/publish',{},{method:'POST'});m.className='note pos';m.textContent='Отправлено на модерацию.'}
+    if(d.items){const L=$('dit').value.split('\n').map(x=>x.trim()).filter(x=>x.length>=3);if(!L.length){m.className='note neg';m.textContent='Добавьте хотя бы одну позицию.';return}
+      for(let i=0;i<L.length;i+=50)await aReq('/ads/'+d.items+'/items',{},{method:'POST',json:{items:L.slice(i,i+50)}});m.className='note pos';m.textContent='Позиций принято: '+L.length+' (появятся в остатках через несколько секунд).'}
+  }catch(x){m.className='note neg';m.textContent=x.message}};
+$('ad').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(d.cp)cp(d.cp==='all'?dAll():$(d.cp).value,b);
+  if(d.cat){const c=CATS.find(x=>String(x.id)===d.cat);S.ad.cat=c;save();$('dcs').value=c.p;$('dcl').innerHTML='';fLoad(c)}
+  if(d.phd!=null){PH.splice(+d.phd,1);dPh()}});
+
+/* ===== Telegram-бот (работает через локальный сервер) ===== */
+const LH={'X-FlipCalc':'1','Content-Type':'application/json'};
+async function tStat(){try{const r=await fetch('/api/local/settings',{headers:{'X-FlipCalc':'1'}});if(!r.ok)throw 0;const j=await r.json();
+  $('tst').innerHTML=(j.bots.length?j.bots.map(b=>`<div class="row" style="align-items:center;margin-top:6px"><span>@${esc(b.name)} — ${b.owner?'подключён ✓':`<a href="${esc(b.link)}" target="_blank" rel="noopener">нажмите Start</a>`}</span><button class="cpb" data-rm="${esc(b.name)}">Удалить</button></div>`).join(''):'Бот не подключён.')+`<p class="note">Подключено ботов: ${j.bots.length}. ${j.miniapp?'Mini App запущен: откройте своего бота в Telegram и нажмите кнопку «FlipCalc» слева от строки ввода.':'Mini App не запущен (нет cloudflared.exe в папке с программой).'}</p>`}
+  catch(e){$('tst').textContent='Доступно только при запуске через ЗАПУСК.bat (страница localhost:8000).'}}
+async function tPost(b){const r=await fetch('/api/local/settings',{method:'POST',headers:LH,body:JSON.stringify(b)});let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(typeof j.detail==='string'?j.detail:'Ошибка '+r.status);return j}
+$('ton').onclick=async()=>{const k=AC()&&AC().key;if(!k){$('tst').textContent='Сначала вставьте токен магазина в поле «API-ключ».';return}
+  try{await tPost({ym:k,bot:$('tbt').value.trim()});$('tbt').value='';tStat()}catch(e){$('tst').textContent=e.message}};
+$('tst').onclick=async e=>{const n=e.target.dataset.rm;if(!n)return;try{await tPost({remove:n});tStat()}catch(x){$('tst').textContent=x.message}};
+/* ===== данные хранятся на локальном сервере пользователя ===== */
+(async()=>{try{const r=await fetch('/api/local/state',{headers:{'X-FlipCalc':'1'}});if(!r.ok)return;const j=await r.json();
+  if(j.state&&(j.state._ts||0)>(S._ts||0)&&!sessionStorage.getItem('fcr')){sessionStorage.setItem('fcr','1');localStorage.setItem('fc1',JSON.stringify(j.state));location.reload()}
+  else if(!j.state||(S._ts||0)>(j.state._ts||0))push()}catch(e){}})();
+S.view='home';hLoad();cInit();cRender();view();
+tabs();sync();render();
+
+/* ===== Языки и резервная копия ===== */
+const LN={ru:'Русский',en:'English',uk:'Українська',de:'Deutsch',es:'Español'},LI={en:1,uk:2,de:3,es:4};
+const TR=[ // ru, en, uk, de, es
+['Умный финансовый помощник','Smart financial assistant','Розумний фінансовий помічник','Smarter Finanzassistent','Asistente financiero inteligente'],
+['Инструменты','Tools','Інструменти','Werkzeuge','Herramientas'],
+['Настройки разделов','Section settings','Налаштування розділів','Bereiche anpassen','Ajustes de secciones'],
+['Настройки','Settings','Налаштування','Einstellungen','Ajustes'],
+['‹ Назад','‹ Back','‹ Назад','‹ Zurück','‹ Atrás'],
+['Прибыль','Profit','Прибуток','Gewinn','Beneficio'],
+['Конвертер','Converter','Конвертер','Umrechner','Conversor'],
+['Товары','Goods','Товари','Waren','Productos'],
+['Аналитика','Analytics','Аналітика','Analyse','Analítica'],
+['Цели','Goals','Цілі','Ziele','Metas'],
+['Объявление','Listing','Оголошення','Anzeige','Anuncio'],
+['Поддержка','Support','Підтримка','Support','Apoyo'],
+['Комиссии и наценки','Fees and markups','Комісії та націнки','Gebühren und Aufschläge','Comisiones y márgenes'],
+['Валюты и крипта','Currencies and crypto','Валюти та крипта','Währungen und Krypto','Divisas y cripto'],
+['Учёт и остатки','Inventory and stock','Облік і залишки','Bestand und Lager','Inventario y stock'],
+['Прибыль и статистика','Profit and stats','Прибуток і статистика','Gewinn und Statistik','Beneficio y estadísticas'],
+['Планы заработка','Earning plans','Плани заробітку','Verdienstpläne','Planes de ingresos'],
+['Маркетплейсы','Marketplaces','Маркетплейси','Marktplätze','Marketplaces'],
+['Создать через API','Create via API','Створити через API','Per API erstellen','Crear por API'],
+['Помощь проекту','Support the project','Допомога проєкту','Projekt unterstützen','Apoyar el proyecto'],
+['Закупка','Purchase price','Закупівля','Einkauf','Compra'],
+['Доп. расходы','Extra costs','Дод. витрати','Zusatzkosten','Gastos extra'],
+['Цена продажи','Selling price','Ціна продажу','Verkaufspreis','Precio de venta'],
+['Желаемая чистая прибыль','Target net profit','Бажаний чистий прибуток','Gewünschter Nettogewinn','Beneficio neto deseado'],
+['Профиль комиссий','Fee profile','Профіль комісій','Gebührenprofil','Perfil de comisiones'],
+['Наценка','Markup','Націнка','Aufschlag','Margen'],
+['Наценка, %','Markup, %','Націнка, %','Aufschlag, %','Margen, %'],
+['Цена','Price','Ціна','Preis','Precio'],
+['Безубыток','Break-even','Беззбитковість','Gewinnschwelle','Punto de equilibrio'],
+['Таблица наценок','Markup table','Таблиця націнок','Aufschlagstabelle','Tabla de márgenes'],
+['Название','Name','Назва','Name','Nombre'],
+['Новый','New','Новий','Neu','Nuevo'],
+['Копировать','Copy','Копіювати','Kopieren','Copiar'],
+['Удалить','Delete','Видалити','Löschen','Eliminar'],
+['Скопировано','Copied','Скопійовано','Kopiert','Copiado'],
+['Баланс','Balance','Баланс','Kontostand','Saldo'],
+['Заказы','Orders','Замовлення','Bestellungen','Pedidos'],
+['Количество','Quantity','Кількість','Menge','Cantidad'],
+['Категория','Category','Категорія','Kategorie','Categoría'],
+['Добавить','Add','Додати','Hinzufügen','Añadir'],
+['Всё время','All time','Весь час','Gesamt','Todo el tiempo'],
+['Год','Year','Рік','Jahr','Año'],
+['Разделы приложения','App sections','Розділи застосунку','App-Bereiche','Secciones de la app'],
+['Сбросить настройки','Reset settings','Скинути налаштування','Einstellungen zurücksetzen','Restablecer ajustes'],
+['Сравнение площадок','Platform comparison','Порівняння майданчиків','Plattformvergleich','Comparar plataformas'],
+['Партия товаров','Batch of goods','Партія товарів','Warenpartie','Lote de productos'],
+['График прибыли','Profit chart','Графік прибутку','Gewinndiagramm','Gráfico de beneficio'],
+['Экспорт в CSV','Export to CSV','Експорт у CSV','CSV-Export','Exportar a CSV'],
+['Язык','Language','Мова','Sprache','Idioma'],
+['Язык приложения','App language','Мова застосунку','App-Sprache','Idioma de la app'],
+['Сбросить язык','Reset language','Скинути мову','Sprache zurücksetzen','Restablecer idioma'],
+['Переведены меню, названия разделов и основные подписи. Всё, что не переведено, остаётся на русском.','Menus, section names and main labels are translated. Anything not translated stays in Russian.','Перекладено меню, назви розділів і основні підписи. Решта лишається російською.','Menüs, Bereichsnamen und die wichtigsten Beschriftungen sind übersetzt. Der Rest bleibt auf Russisch.','Se traducen menús, secciones y etiquetas principales. Lo demás sigue en ruso.'],
+['Резервная копия','Backup','Резервна копія','Sicherung','Copia de seguridad'],
+['Скопировать копию','Copy backup','Копіювати копію','Sicherung kopieren','Copiar copia'],
+['Восстановить','Restore','Відновити','Wiederherstellen','Restaurar']];
+TR.push(...[["Тема", "Theme", "Тема", "Design", "Tema"], ["Сменить тему", "Switch theme", "Змінити тему", "Thema wechseln", "Cambiar tema"], ["Шаблоны объявлений", "Listing templates", "Шаблони оголошень", "Anzeigenvorlagen", "Plantillas de anuncios"], ["Название шаблона", "Template name", "Назва шаблону", "Vorlagenname", "Nombre de plantilla"], ["Сохранить шаблон", "Save template", "Зберегти шаблон", "Vorlage speichern", "Guardar plantilla"], ["Применить", "Apply", "Застосувати", "Anwenden", "Aplicar"], ["Сохраняет заголовок, описание и текст выдачи из текущего объявления.", "Saves the title, description and delivery text of the current listing.", "Зберігає заголовок, опис і текст видачі поточного оголошення.", "Speichert Titel, Beschreibung und Liefertext der aktuellen Anzeige.", "Guarda título, descripción y texto de entrega del anuncio actual."], ["Шаблонов пока нет", "No templates yet", "Шаблонів ще немає", "Noch keine Vorlagen", "Aún no hay plantillas"]]);const MAP={};TR.forEach(r=>MAP[r[0]]=r);
+const lgObs=new MutationObserver(()=>tr());
+function tr(){const l=LI[S.lang];if(!l)return;lgObs.disconnect();
+ const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+ while(n=w.nextNode()){const t=n.nodeValue.trim(),r=MAP[t];if(r)n.nodeValue=n.nodeValue.replace(t,r[l])}
+ document.querySelectorAll('[placeholder]').forEach(e=>{const r=MAP[e.getAttribute('placeholder')];if(r)e.setAttribute('placeholder',r[l])});
+ lgObs.observe(document.body,{childList:true,subtree:true,characterData:true})}
+$('lg').innerHTML=Object.keys(LN).map(k=>`<option value="${k}" ${(S.lang||'ru')===k?'selected':''}>${LN[k]}</option>`).join('');
+const setLang=v=>{S.lang=v;save();location.reload()};
+$('lg').onchange=e=>setLang(e.target.value);
+$('lgr').onclick=()=>setLang('ru');
+$('bkc').onclick=async()=>{const t=JSON.stringify(S);$('bk').value=t;try{await navigator.clipboard.writeText(t);$('bkm').textContent='Копия скопирована. Сохраните её в заметках.'}catch(e){$('bk').select();$('bkm').textContent='Выделено — скопируйте вручную.'}};
+$('bkr').onclick=()=>{try{const j=JSON.parse($('bk').value);if(!j||!Array.isArray(j.profiles))throw 0;j._ts=Date.now();localStorage.setItem('fc1',JSON.stringify(j));location.reload()}catch(e){$('bkm').textContent='Не похоже на копию FlipCalc. Вставьте текст целиком.'}};
+document.documentElement.lang=S.lang||'ru';tr();
+
+/* ===== Светлая тема, шаблоны, кнопки копирования ===== */
+function setTheme(t){document.documentElement.dataset.theme=t;try{TG&&TG.setHeaderColor(t==='light'?'#f2f2f7':'#000000');TG.setBackgroundColor(t==='light'?'#f2f2f7':'#000000')}catch(e){}}
+setTheme(S.theme||'dark');
+$('th').onclick=()=>{S.theme=S.theme==='light'?'dark':'light';save();setTheme(S.theme)};
+S.tpl=S.tpl||[];
+function tplRender(){$('tl').innerHTML=S.tpl.length?S.tpl.map(t=>`<div class="row" style="align-items:center"><span style="color:var(--tx)">${esc(t.n)}</span><span class="ctl"><button data-ta="${t.id}" style="width:auto;padding:0 10px">Применить</button><button data-td="${t.id}">✕</button></span></div>`).join(''):'<p class="note">Шаблонов пока нет</p>';tr()}
+const _dR=dRender;dRender=function(){_dR();tplRender()};
+$('tsv').onclick=()=>{const n=$('tn').value.trim(),a=S.ad;if(!n){$('tm').textContent='Введите название шаблона.';return}
+ S.tpl.push({id:uid(),n,t:a.t||'',d:a.d||'',g:[...(a.g||[])]});$('tn').value='';save();tplRender();$('tm').textContent='Шаблон сохранён.'};
+$('tl').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.td){S.tpl=S.tpl.filter(t=>t.id!==b.dataset.td);save();tplRender()}
+ if(b.dataset.ta){const t=S.tpl.find(x=>x.id===b.dataset.ta);if(t){Object.assign(S.ad,{t:t.t,d:t.d,g:[...t.g]});save();dRender();$('tm').textContent='Шаблон применён: '+t.n}}};
+const cpObs=new MutationObserver(()=>addCp()),nv=t=>t.replace(/[\s\u00a0₽%]/g,'').replace('−','-').replace(',','.');
+const cpb=v=>`<button class="cpb cpm" data-v="${v}" title="Копировать">📋</button>`;
+function addCp(){cpObs.disconnect();
+ document.querySelectorAll('.big').forEach(el=>{if(!el.querySelector('.cpm')&&/\d/.test(el.textContent))el.insertAdjacentHTML('beforeend',cpb(nv(el.textContent)))});
+ document.querySelectorAll('#res .row span:last-child,#cmpr .row span:last-child,#batr .row span:last-child,#res td:not(:first-child),#cmpr td:not(:first-child),#batr td:not(:first-child)').forEach(el=>{
+  if(!el.querySelector('.cpm')&&/\d.*₽/.test(el.textContent))el.insertAdjacentHTML('beforeend',cpb(nv(el.textContent)))});
+ cpObs.observe(document.body,{childList:true,subtree:true})}
+document.addEventListener('click',e=>{const b=e.target.closest('.cpm');if(b)cp(b.dataset.v,b)});
+addCp();tplRender();
+</script>
+</body>
+</html>

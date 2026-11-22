@@ -1,0 +1,8 @@
+# Личные данные и токены — никогда не загружать
+data/
+flipcalc_data.json
+state.json
+*.tmp
+__pycache__/
+*.pyc
+.env
